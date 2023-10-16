@@ -1,0 +1,8 @@
+flask==2.3.2
+flask-restful==0.3.10
+pykwalify==1.8.0
+GitPython==3.1.31
+pyyaml==6.0
+rich==13.4.2
+pandas==2.0.2
+

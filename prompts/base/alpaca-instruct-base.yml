@@ -1,0 +1,20 @@
+title: Alpaca instruct base
+uuid: 548ffd0a-1505-49c1-9248-cabf1af4d912
+description: Basic Alpaca instruct template
+category: base
+provider: local
+model: alpaca
+model_settings:
+  temperature: 0.8
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  ### Instruction:
+  Write a haiku about the moons of Jupiter
+  ### Response: 
+references:
+  - https://github.com/deadbits/prompt-serve
+tags:
+  - local-llm
+  - alpaca
+  - base

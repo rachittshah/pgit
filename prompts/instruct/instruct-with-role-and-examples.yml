@@ -1,0 +1,29 @@
+title: Instruct with Role and examples
+uuid: 2a2fd7cb-ba7d-4b3d-9613-ef22240aed3f
+description: Builds on the Instruct with Role prompt by providing examples of ideal responses
+category: instruct
+provider: openai
+model: gpt-3.5-turbo
+model_settings:
+  temperature: 0.8
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  You are a friendly and helpful AI acting as a {role}. You will:
+  {role_criteria}
+
+  Examples:
+  {examples}
+  
+  User: {instruction}
+input_variables:
+  - role
+  - role_criteria
+  - examples
+  - instruction
+references:
+  - https://github.com/deadbits/prompt-serve
+tags:
+  - instruct
+  - role-following
+  - openai

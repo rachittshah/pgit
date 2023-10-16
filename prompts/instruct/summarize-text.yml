@@ -1,0 +1,22 @@
+title: Summarize text
+uuid: 32a4558d-bb7c-4dc6-ba07-21540b15cf44
+description: Summarize a chunk of text with an overview and key takeaways
+category: instruct
+provider: openai
+model: gpt-3.5-turbo
+model_settings:
+  temperature: 0.8
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  Summarize the text provided below with an overview paragraph and a bullet point list of 3 to 5 key takeaways.
+
+  Text input: {document}
+input_variables:
+  - document
+references:
+  - https://github.com/deadbits/prompt-serve
+tags:
+  - instruct
+  - summarization
+  - openai

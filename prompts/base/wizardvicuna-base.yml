@@ -1,0 +1,24 @@
+title: WizardVicuna base
+uuid: edd0dba2-8166-465d-8820-efc9cff46800
+description: Standard prompt template for a chat with WizardVicuna
+category: base
+provider: local
+model: WizardVicuna
+model_settings:
+  temperature: 0.8
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  A chat between a human and an assistant.
+  
+  ### Human: 
+  Write a haiku about the moons of Jupiter
+  ### Assistant: 
+  <assistant>
+references:
+  - https://huggingface.co/TheBloke/wizard-vicuna-13B-GPTQ
+  - https://huggingface.co/junelee/wizard-vicuna-13b/discussions/1
+tags:
+  - local-llm
+  - wizardvicuna
+  - base

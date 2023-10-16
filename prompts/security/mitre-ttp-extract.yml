@@ -1,0 +1,28 @@
+title: Extract MITRE TTPs
+uuid: 49ce6be2-87fa-4bc7-a37f-de908909b4d5
+description: Extract MITRE ATTCK TTPs from provided context documents
+category: instruct
+provider: openai
+model: gpt-3.5-turbo
+model_settings:
+  temperature: 0.8
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  Extract all MITRE ATT&CK Tactics, Techniques, and Procedures from the text provided below. 
+  Each extracted TTP must be presented as:
+  <Tactic Name> - <Tactic ID> - <Technique ID> - <Technique Name>
+
+  Example:
+  Reconnaissance - TA0043 - T1595 - Active Scanning
+
+  Context:
+  {documents}
+input_variables:
+  - documents
+references:
+  - https://github.com/deadbits/prompt-serve
+tags:
+  - openai
+  - cti
+  - extraction

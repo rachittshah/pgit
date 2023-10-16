@@ -1,0 +1,72 @@
+map:
+  title:
+    type: str
+    required: true
+  uuid:
+    type: str
+    required: true
+  description:
+    type: str
+    required: true
+  category:
+    type: str
+    required: true
+  provider:
+    type: str
+    required: false
+  model:
+    type: str
+    required: false
+  model_settings:
+    type: map
+    required: false
+    mapping:
+      temperature:
+        type: float
+        required: false
+      top_k:
+        type: int
+        required: false
+      top_p:
+        type: float
+        required: false
+      max_tokens:
+        type: int
+        required: false
+      stream:
+        type: bool
+        required: false
+      presence_penalty:
+        type: float
+        required: false
+      frequency_penalty:
+        type: float
+        required: false
+  prompt:
+    type: str
+    required: true
+  input_variables:
+    type: seq
+    required: false
+    sequence:
+    - type: str
+  references:
+    type: seq
+    required: false
+    sequence:
+    - type: str
+  associations:
+    type: seq
+    required: false
+    sequence:
+    - type: str
+  packs:
+    type: seq
+    required: false
+    sequence:
+    - type: str
+  tags:
+    type: seq
+    required: false
+    sequence:
+    - type: str
