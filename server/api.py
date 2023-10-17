@@ -66,7 +66,7 @@ async def upload_file(repo_name: str, file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail=f'directory is not a git repository: {repo_path}')
 
         file_path = os.path.join(repo_path, file.filename)
-        
+
         async with aiofiles.open(file_path, 'wb') as f:
             content = await file.read()
             await f.write(content)
@@ -74,10 +74,10 @@ async def upload_file(repo_name: str, file: UploadFile = File(...)):
         repo = Repo(repo_path)
         repo.git.add([file_path])
         repo.index.commit('Add file through API')
-        msg = {'filename': file.filename, 'message': 'file uploaded and committed successfully'}
-        
-        return msg
-    
+        return {
+            'filename': file.filename,
+            'message': 'file uploaded and committed successfully',
+        }
     except Exception as err:
         raise HTTPException(status_code=400, detail=str(err))
 
@@ -89,17 +89,16 @@ async def read_file_by_name(repo_name: str, prompt_name: str, raw: Optional[bool
         raise HTTPException(status_code=400, detail=f'directory is not a git repository: {repo_path}')
 
     file_path = os.path.join(repo_path, f'{prompt_name}.yml')
-    
-    if os.path.exists(file_path):
-        data = parse_yaml(file_path)
-        
-        if raw:
-            return {'prompt': data.get('prompt')}
-        else:
-            return FileResponse(file_path, media_type='application/x-yaml')
-    
-    else:
+
+    if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f'File not found: {file_path}')
+    data = parse_yaml(file_path)
+
+    return (
+        {'prompt': data.get('prompt')}
+        if raw
+        else FileResponse(file_path, media_type='application/x-yaml')
+    )
 
 
 @app.get('/{repo_name}/_uuid/{prompt_uuid}', responses={200: {'content': {'application/x-yaml': {}}}})

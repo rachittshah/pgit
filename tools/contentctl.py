@@ -110,28 +110,27 @@ def ask_for_input(field_name, field_type, is_required, default_value=None):
 
 def create_prompt():
     # create the YAML map
-    map_info = {}
+    map_info = {'title': ask_for_input('title', 'str', True)}
 
-    map_info['title'] = ask_for_input('title', 'str', True)
     map_info['uuid'] = str(uuid.uuid4())
     map_info['description'] = ask_for_input('description', 'str', True)
     map_info['category'] = ask_for_input('category', 'str', True)
     map_info['provider'] = ask_for_input('provider', 'str', False)
     map_info['model'] = ask_for_input('model', 'str', False)
-    
+
     # model settings with default values
     model_settings_fields = ['temperature', 'top_k', 'top_p', 'max_tokens', 'stream', 'presence_penalty', 'frequency_penalty']
     model_settings_types = ['float', 'int', 'float', 'int', 'bool', 'float', 'float']
     model_settings_defaults = [0.8, None, 1, None, False, 0.0, 0.0]
-    
+
     model_settings = {field: ask_for_input(field, ftype, False, default) for field, ftype, default in zip(model_settings_fields, model_settings_types, model_settings_defaults)}
-    
+
     # only add model_settings to map if it's not empty
     if any(model_settings.values()):
         map_info['model_settings'] = model_settings
 
     map_info['prompt'] = ask_for_input('prompt', 'str', True)
-    
+
     # Sequence fields
     seq_fields = ['references', 'associations', 'packs', 'tags', 'input_variables']
     for field in seq_fields:
@@ -216,7 +215,7 @@ if __name__ == '__main__':
         action='store', 
         help='create new prompt'
     )
-    
+
     parser.add_argument(
         '-s', '--stats',
         action='store',
@@ -233,7 +232,7 @@ if __name__ == '__main__':
 
     if args.init:
         if not args.config:
-            rprint(f'[bold red](error)[/bold red] config file required for initialization')
+            rprint('[bold red](error)[/bold red] config file required for initialization')
             sys.exit(1)
 
         config = Config(args.config)
@@ -254,7 +253,7 @@ if __name__ == '__main__':
 
         collect_stats_from_dir(args.stats)
         display_stats()
-    
+
     if args.langchain:
         if not os.path.exists(args.langchain):
             rprint(f'[bold red](error)[/bold red] template does not exist: {args.langchain}')
@@ -264,7 +263,7 @@ if __name__ == '__main__':
         if original is None or langchain_template is None:
             rprint(f'[bold red](error)[/bold red] failed to convert prompt: {args.langchain}')
             sys.exit(1)
-        
+
         rprint(f'[bold green](status)[/bold green] successfully converted template: {args.langchain}')
-        rprint(f'[bold orange3]LangChain PromptTemplate[/bold orange3]')
+        rprint('[bold orange3]LangChain PromptTemplate[/bold orange3]')
         print(json.dumps(langchain_template.dict(), indent=2))
