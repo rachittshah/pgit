@@ -18,6 +18,12 @@ The feature-rich software includes:
 
 **7. Prompt Creation:** A command-line utility lets you create a prompt interactively, adhering to the PGit schema. This feature is currently a proof of concept and is under development for further enhancements.
 
+**8. LiteLLM Evaluation:** The `tools/litellm_multimodel.py` script runs a single prompt against multiple models via [LiteLLM](https://github.com/BerriAI/litellm), enabling quick comparisons similar to Promptfoo.
+
+**9. Promptfoo-style Configs:** The `tools/promptfoo_eval.py` utility processes a Promptfoo-style YAML config to run multiple prompts and test cases across several models. It supports Jinja2 templating, multiple assertion types (exact, contains, regex, etc.), and can export results to JSON.
+
+**10. Web UI:** Launch `tools/promptfoo_ui.py` to view evaluation results in a simple browser-based table, enabling quick visual comparisons of prompt performance across models.
+
 In the ever-growing world of AI, PGit brings a much-needed order to manage language model prompts efficiently. Its features resonate with the industry's demand for traceability and reusability, making it a quintessential tool for anyone dealing with large language models.
 
 
