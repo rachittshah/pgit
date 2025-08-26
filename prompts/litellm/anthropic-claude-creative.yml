@@ -1,0 +1,37 @@
+title: Anthropic Claude Creative Writing
+uuid: b2c3d4e5-f6g7-8901-bcde-f23456789012
+description: Generate creative content using Anthropic's Claude model
+category: litellm
+provider: anthropic
+model: claude-3-sonnet-20240229
+model_settings:
+  temperature: 0.8
+  max_tokens: 800
+  top_p: 0.95
+prompt: |
+  Write a creative {content_type} based on the following prompt:
+
+  Theme: {theme}
+  Style: {style}
+  Target audience: {audience}
+
+  Requirements:
+  - Be engaging and original
+  - Match the specified style
+  - Appropriate for the target audience
+  - Include vivid descriptions and compelling narrative
+
+  {content_type}:
+input_variables:
+  - content_type
+  - theme
+  - style
+  - audience
+references:
+  - https://docs.litellm.ai/docs/providers/anthropic
+tags:
+  - litellm
+  - anthropic
+  - claude
+  - creative
+  - writing

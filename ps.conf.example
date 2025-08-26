@@ -1,0 +1,7 @@
+[main]
+repo_path = /path/to/your/prompt/repositories
+
+[llm_providers]
+# Provider-specific settings (optional)
+# azure = api_base=https://your-resource.openai.azure.com,api_version=2023-05-15
+# ollama = api_base=http://localhost:11434

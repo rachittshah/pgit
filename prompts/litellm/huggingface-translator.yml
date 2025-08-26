@@ -1,0 +1,35 @@
+title: HuggingFace Language Translation
+uuid: e5f6g7h8-i9j0-1234-efgh-567890123456
+description: Translate text between languages using HuggingFace models
+category: litellm
+provider: huggingface
+model: microsoft/DialoGPT-medium
+model_settings:
+  temperature: 0.3
+  max_tokens: 400
+  top_p: 0.8
+prompt: |
+  Please translate the following text from {source_language} to {target_language}.
+
+  Original text: {text}
+
+  Translation guidelines:
+  - Maintain the original meaning and tone
+  - Use natural, fluent language in the target language
+  - Preserve any formatting or special elements
+  - If certain terms don't translate directly, provide the best cultural equivalent
+
+  Translation:
+input_variables:
+  - source_language
+  - target_language
+  - text
+references:
+  - https://docs.litellm.ai/docs/providers/huggingface
+  - https://huggingface.co/
+tags:
+  - litellm
+  - huggingface
+  - translation
+  - multilingual
+  - language

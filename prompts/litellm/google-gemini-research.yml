@@ -1,0 +1,46 @@
+title: Google Gemini Research Assistant  
+uuid: c3d4e5f6-g7h8-9012-cdef-345678901234
+description: Research and summarize information using Google's Gemini model
+category: litellm
+provider: google
+model: gemini-pro
+model_settings:
+  temperature: 0.2
+  max_tokens: 1000
+  top_p: 0.8
+prompt: |
+  You are a research assistant. Please provide a comprehensive research summary on the following topic:
+
+  Topic: {topic}
+  
+  Focus areas: {focus_areas}
+  
+  Please structure your response with:
+  
+  ## Overview
+  Brief introduction to the topic
+  
+  ## Key Points
+  - Main findings and facts
+  - Important statistics or data
+  - Current trends
+  
+  ## Implications
+  What this means for {target_domain}
+  
+  ## Sources and Further Reading
+  Suggest reliable sources for more information
+  
+  Make sure the information is accurate and up-to-date.
+input_variables:
+  - topic
+  - focus_areas
+  - target_domain
+references:
+  - https://docs.litellm.ai/docs/providers/gemini
+tags:
+  - litellm
+  - google
+  - gemini
+  - research
+  - summary
