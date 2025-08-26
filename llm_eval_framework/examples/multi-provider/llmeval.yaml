@@ -1,0 +1,78 @@
+# LLM Evaluation Framework Configuration
+description: "Multi-provider LLM comparison using LiteLLM"
+
+providers:
+  # OpenAI models
+  - id: openai/gpt-4
+    label: "GPT-4"
+    temperature: 0.3
+  
+  - id: openai/gpt-3.5-turbo
+    label: "GPT-3.5 Turbo"
+    temperature: 0.3
+  
+  # Anthropic models
+  - id: anthropic/claude-3-sonnet-20241022
+    label: "Claude 3 Sonnet"
+    temperature: 0.3
+  
+  # Google models
+  - id: google/gemini-pro
+    label: "Gemini Pro"
+    temperature: 0.3
+  
+  # Mistral models
+  - id: mistral/mistral-large-latest
+    label: "Mistral Large"
+    temperature: 0.3
+
+prompts:
+  - |
+    You are an expert technical writer. Please write a concise explanation of the following concept:
+    
+    Topic: {{topic}}
+    
+    Requirements:
+    - Keep it under 100 words
+    - Use clear, simple language
+    - Include one practical example
+
+defaultTest:
+  assert:
+    - type: cost
+      threshold: 0.05
+    - type: latency
+      threshold: 10.0
+    - type: regex
+      value: "\\b(example|for instance|such as)\\b"  # Should include examples
+
+tests:
+  - vars:
+      topic: "Machine Learning"
+    assert:
+      - type: icontains
+        value: "algorithm"
+      - type: not-contains
+        value: "I don't know"
+      - type: regex
+        value: "(?i)(learn|train|predict|model)"
+
+  - vars:
+      topic: "Blockchain"
+    assert:
+      - type: icontains
+        value: "distributed"
+      - type: icontains
+        value: "ledger"
+      - type: contains
+        value: "example"
+
+  - vars:
+      topic: "API Design"
+    assert:
+      - type: icontains
+        value: "endpoint"
+      - type: regex
+        value: "(?i)(REST|HTTP|JSON)"
+      - type: contains
+        value: "example"

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ shared_result.title }} - LLM Evaluation Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header with sharing info -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ shared_result.title }}</h1>
+                    <p class="text-sm text-gray-500 mt-1">{{ summary.config.description or "Shared Evaluation Results" }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-share-alt mr-1"></i>
+                        Shared {{ shared_result.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        Expires {{ shared_result.expires_at.strftime('%Y-%m-%d') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Summary Stats -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clipboard-check text-2xl text-green-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pass Rate</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                {{ "%.1f" | format(summary.pass_rate * 100) }}%
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-list-ol text-2xl text-blue-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Tests</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ summary.total_tests }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            {% if summary.total_cost %}
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-dollar-sign text-2xl text-yellow-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Cost</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                ${{ "%.4f" | format(summary.total_cost) }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if summary.average_latency %}
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-2xl text-purple-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Latency</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                {{ "%.2f" | format(summary.average_latency) }}s
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Provider Results Side-by-Side -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Provider Comparison</h2>
+                <p class="text-sm text-gray-500 mt-1">Side-by-side view of results across providers</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {% for provider_id, results in results_by_provider.items() %}
+                    <div class="border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">{{ provider_id }}</h3>
+                            {% set passed_count = results | selectattr("success") | list | length %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                       {% if passed_count == results|length %}bg-green-100 text-green-800
+                                       {% elif passed_count > results|length // 2 %}bg-yellow-100 text-yellow-800
+                                       {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ passed_count }}/{{ results|length }} passed
+                            </span>
+                        </div>
+
+                        <div class="space-y-4">
+                            {% for result in results %}
+                            <div class="bg-gray-50 rounded p-3">
+                                <div class="flex items-center mb-2">
+                                    {% if result.success %}
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    {% else %}
+                                    <i class="fas fa-times-circle text-red-500 mr-2"></i>
+                                    {% endif %}
+                                    <span class="text-sm font-medium text-gray-700">Test {{ loop.index }}</span>
+                                </div>
+
+                                <div class="text-sm text-gray-600 mb-2">
+                                    <strong>Prompt:</strong>
+                                    <div class="bg-white p-2 rounded text-xs font-mono mt-1">
+                                        {{ result.prompt[:100] + "..." if result.prompt|length > 100 else result.prompt }}
+                                    </div>
+                                </div>
+
+                                <div class="text-sm text-gray-600 mb-2">
+                                    <strong>Response:</strong>
+                                    <div class="bg-white p-2 rounded text-xs mt-1">
+                                        {{ result.response[:100] + "..." if result.response|length > 100 else result.response }}
+                                    </div>
+                                </div>
+
+                                {% if result.cost or result.latency %}
+                                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                    {% if result.cost %}
+                                    <span>Cost: ${{ "%.4f" | format(result.cost) }}</span>
+                                    {% endif %}
+                                    {% if result.latency %}
+                                    <span>{{ "%.2f" | format(result.latency) }}s</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                {% if result.error %}
+                                <div class="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                                    {{ result.error }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-500">
+                    Generated by LLM Evaluation Framework
+                </p>
+                <p class="text-sm text-gray-500">
+                    This shared link expires on {{ shared_result.expires_at.strftime('%B %d, %Y') }}
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+description: "Model comparison example - GPT-3.5 vs GPT-4 analysis"
+
+providers:
+  - id: openai:gpt-3.5-turbo
+    label: "GPT-3.5 Turbo"
+    temperature: 0.3
+  - id: openai:gpt-4o-mini
+    label: "GPT-4o Mini"
+    temperature: 0.3
+
+prompts:
+  - |
+    You are a helpful AI assistant. Please analyze the following text and provide insights.
+    
+    Text: {{text}}
+    
+    Analysis focus: {{focus}}
+    
+    Please provide a structured analysis including:
+    1. Main themes
+    2. Key insights
+    3. Recommendations
+
+defaultTest:
+  assert:
+    - type: cost
+      threshold: 0.05
+    - type: latency
+      threshold: 10.0
+    - type: regex
+      value: "(?s).*1\\..*2\\..*3\\."  # Check for numbered structure
+
+tests:
+  - vars:
+      text: "The company's quarterly revenue grew by 15% compared to last year, driven primarily by strong performance in the technology sector. However, operational costs also increased by 8%, leading to concerns about long-term sustainability."
+      focus: "Financial performance"
+    assert:
+      - type: icontains
+        value: "revenue"
+      - type: icontains
+        value: "costs"
+      - type: contains
+        value: "recommendations"
+
+  - vars:
+      text: "Recent studies show that remote work has increased productivity for knowledge workers by an average of 22%. However, collaboration and innovation metrics have shown mixed results, with some teams struggling to maintain creative output."
+      focus: "Workplace productivity"
+    assert:
+      - type: icontains
+        value: "productivity"
+      - type: icontains
+        value: "remote work"
+      - type: not-contains
+        value: "I don't have enough information"
+
+  - vars:
+      text: "Climate change continues to accelerate, with global temperatures rising faster than predicted. Renewable energy adoption has increased significantly, but fossil fuel consumption remains high in developing nations."
+      focus: "Environmental impact"
+    assert:
+      - type: icontains
+        value: "climate"
+      - type: regex
+        value: "(?i)(renewable|environmental|sustainability)"

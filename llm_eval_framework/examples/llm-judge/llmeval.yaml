@@ -1,0 +1,90 @@
+# LLM Judge Evaluation Example
+description: "Using LLMs as judges to evaluate AI responses"
+
+providers:
+  - id: openai/gpt-4
+    label: "GPT-4"
+    temperature: 0.7
+    
+  - id: anthropic/claude-3-sonnet-20241022
+    label: "Claude 3 Sonnet"
+    temperature: 0.7
+
+prompts:
+  - |
+    You are a helpful customer service representative. Please respond to this customer inquiry:
+    
+    Customer: {{inquiry}}
+    
+    Please provide a helpful, professional, and empathetic response.
+
+defaultTest:
+  assert:
+    - type: cost
+      threshold: 0.10
+    - type: latency
+      threshold: 15.0
+
+tests:
+  - vars:
+      inquiry: "I'm frustrated because my order hasn't arrived and it's been 2 weeks. This is unacceptable!"
+    assert:
+      - type: llm-rubric
+        value: |
+          Evaluate this customer service response on a scale of 0-100 based on:
+          1. Empathy - Does it acknowledge the customer's frustration?
+          2. Professionalism - Is the tone appropriate and respectful?
+          3. Helpfulness - Does it offer concrete steps to resolve the issue?
+          4. Accountability - Does it take responsibility without making excuses?
+          
+          A score of 70 or above indicates good customer service.
+          
+      - type: llm-helpfulness
+      
+      - type: contains
+        value: "understand"  # Should show empathy
+        
+      - type: not-contains
+        value: "that's not our fault"  # Should not blame customer
+
+  - vars:
+      inquiry: "Can you explain how your return policy works? I bought something online but want to return it."
+    assert:
+      - type: llm-rubric
+        value: |
+          Evaluate this response for providing clear return policy information:
+          1. Clarity - Is the explanation easy to understand?
+          2. Completeness - Does it cover key return policy details?
+          3. Actionability - Can the customer act on this information?
+          4. Accuracy - Does it provide factual information?
+          
+          A score of 75 or above indicates a clear, helpful explanation.
+          
+      - type: llm-factcheck
+      
+      - type: icontains
+        value: "return"
+        
+      - type: regex
+        value: "(?i)(days?|time|period)"  # Should mention timeframes
+
+  - vars:
+      inquiry: "I love your product! It's amazing. Can you tell me about other similar products you offer?"
+    assert:
+      - type: llm-rubric
+        value: |
+          Evaluate this upselling/cross-selling response:
+          1. Appreciation - Does it acknowledge the positive feedback?
+          2. Relevance - Are suggested products relevant to their interests?
+          3. Balance - Is it helpful without being overly pushy?
+          4. Information - Does it provide useful product details?
+          
+          A score of 70 or above indicates effective but respectful upselling.
+          
+      - type: llm-helpfulness
+      
+      - type: icontains
+        value: "thank"  # Should thank for positive feedback
+        
+      - type: not-contains
+        value: "buy now"  # Shouldn't be too pushy

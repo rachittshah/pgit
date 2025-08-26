@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Evaluation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">LLM Evaluation Results</h1>
+                    <p class="text-sm text-gray-500 mt-1">{{ summary.config.description or "Evaluation Report" }}</p>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="shareResults()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-share-alt mr-2"></i>Share
+                    </button>
+                    <button onclick="exportResults('json')" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>Export JSON
+                    </button>
+                    <button onclick="exportResults('csv')" 
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-file-csv mr-2"></i>Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Summary Stats -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clipboard-check text-2xl text-green-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pass Rate</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                {{ "%.1f" | format(summary.pass_rate * 100) }}%
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-list-ol text-2xl text-blue-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Tests</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ summary.total_tests }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            {% if summary.total_cost %}
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-dollar-sign text-2xl text-yellow-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Cost</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                ${{ "%.4f" | format(summary.total_cost) }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if summary.average_latency %}
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-2xl text-purple-600"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Latency</dt>
+                            <dd class="text-lg font-medium text-gray-900">
+                                {{ "%.2f" | format(summary.average_latency) }}s
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Provider Comparison -->
+        <div class="bg-white rounded-lg shadow mb-8" x-data="providerComparison()">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Provider Comparison</h2>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tests</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Cost</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Latency</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="[provider, data] in Object.entries(comparison)" :key="provider">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="provider"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                              :class="data.pass_rate >= 0.8 ? 'bg-green-100 text-green-800' : 
+                                                      data.pass_rate >= 0.6 ? 'bg-yellow-100 text-yellow-800' : 
+                                                      'bg-red-100 text-red-800'"
+                                              x-text="(data.pass_rate * 100).toFixed(1) + '%'">
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span x-text="data.passed_tests + '/' + data.total_tests"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span x-text="'$' + data.avg_cost.toFixed(4)"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <span x-text="data.avg_latency.toFixed(2) + 's'"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Detailed Test Results</h2>
+            </div>
+            <div class="divide-y divide-gray-200">
+                {% for result in summary.results %}
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="text-sm font-medium text-gray-900">{{ result.provider_id }}</h3>
+                                {% if result.success %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>Pass
+                                </span>
+                                {% else %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-times mr-1"></i>Fail
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Prompt</h4>
+                                    <div class="bg-gray-50 p-3 rounded text-sm text-gray-600 font-mono">
+                                        {{ result.prompt[:200] + "..." if result.prompt|length > 200 else result.prompt }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Response</h4>
+                                    <div class="bg-gray-50 p-3 rounded text-sm text-gray-600">
+                                        {{ result.response[:200] + "..." if result.response|length > 200 else result.response }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if result.assertion_results %}
+                            <div class="mt-4">
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Assertions</h4>
+                                <div class="space-y-2">
+                                    {% for assertion in result.assertion_results %}
+                                    <div class="flex items-center text-sm">
+                                        {% if assertion.passed %}
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        {% else %}
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        {% endif %}
+                                        <span class="text-gray-700">{{ assertion.type }}: {{ assertion.message or "Check passed" }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if result.error %}
+                            <div class="mt-4">
+                                <div class="bg-red-50 border border-red-200 rounded p-3">
+                                    <div class="flex">
+                                        <i class="fas fa-exclamation-circle text-red-400 mr-2 mt-0.5"></i>
+                                        <div class="text-sm text-red-700">{{ result.error }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Thumbs up/down -->
+                        <div class="ml-4 flex space-x-2">
+                            <button onclick="recordThumbs('{{ result.provider_id }}', {{ loop.index0 }}, true)" 
+                                    class="text-gray-400 hover:text-green-500 transition-colors" 
+                                    title="Thumbs up">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            <button onclick="recordThumbs('{{ result.provider_id }}', {{ loop.index0 }}, false)" 
+                                    class="text-gray-400 hover:text-red-500 transition-colors" 
+                                    title="Thumbs down">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {% if result.cost or result.latency %}
+                    <div class="mt-4 flex space-x-6 text-sm text-gray-500">
+                        {% if result.cost %}
+                        <div class="flex items-center">
+                            <i class="fas fa-dollar-sign mr-1"></i>
+                            Cost: ${{ "%.4f" | format(result.cost) }}
+                        </div>
+                        {% endif %}
+                        {% if result.latency %}
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            Latency: {{ "%.2f" | format(result.latency) }}s
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function providerComparison() {
+            return {
+                comparison: {},
+                async init() {
+                    const response = await fetch('/api/compare');
+                    this.comparison = await response.json();
+                }
+            }
+        }
+
+        async function shareResults() {
+            try {
+                const response = await fetch('/api/share', { method: 'POST' });
+                const data = await response.json();
+                
+                const shareUrl = window.location.origin + data.share_url;
+                await navigator.clipboard.writeText(shareUrl);
+                
+                alert(`Share URL copied to clipboard!\n\nURL: ${shareUrl}\nExpires: ${new Date(data.expires_at).toLocaleDateString()}`);
+            } catch (error) {
+                console.error('Failed to share results:', error);
+                alert('Failed to create share link');
+            }
+        }
+
+        async function exportResults(format) {
+            try {
+                const response = await fetch(`/api/export/${format}`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (format === 'json') {
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'evaluation_results.json';
+                    a.click();
+                } else if (format === 'csv') {
+                    const blob = new Blob([data.csv_data], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'evaluation_results.csv';
+                    a.click();
+                }
+            } catch (error) {
+                console.error('Failed to export results:', error);
+                alert('Failed to export results');
+            }
+        }
+
+        async function recordThumbs(providerId, testIndex, thumbsUp) {
+            try {
+                await fetch('/api/thumbs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        result_id: 'current',
+                        provider_id: providerId,
+                        test_index: testIndex,
+                        thumbs_up: thumbsUp
+                    })
+                });
+                
+                // Visual feedback
+                event.target.style.color = thumbsUp ? '#10b981' : '#ef4444';
+                setTimeout(() => {
+                    event.target.style.color = '';
+                }, 1000);
+            } catch (error) {
+                console.error('Failed to record thumbs:', error);
+            }
+        }
+    </script>
+</body>
+</html>
