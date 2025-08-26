@@ -1,0 +1,32 @@
+title: DeepSeek R1 Advanced Reasoning
+uuid: f6g7h8i9-j0k1-2345-fghi-678901234567
+description: Advanced reasoning and problem-solving using DeepSeek R1 model
+category: litellm
+provider: deepseek
+model: deepseek-r1
+model_settings:
+  temperature: 0.1
+  max_tokens: 2000
+  top_p: 0.8
+prompt: |
+  Please solve the following problem using step-by-step reasoning:
+
+  Problem: {problem}
+
+  Requirements:
+  - Break down the problem into logical steps
+  - Show your reasoning process clearly
+  - Consider alternative approaches
+  - Provide a well-structured solution
+  
+  Please think through this carefully:
+input_variables:
+  - problem
+references:
+  - https://docs.litellm.ai/docs/providers/deepseek
+tags:
+  - litellm
+  - deepseek
+  - reasoning
+  - problem-solving
+  - r1

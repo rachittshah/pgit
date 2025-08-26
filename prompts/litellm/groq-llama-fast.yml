@@ -1,0 +1,35 @@
+title: Groq Llama 3.1 Fast Inference
+uuid: h8i9j0k1-l2m3-4567-hijk-890123456789
+description: Ultra-fast text generation using Groq Llama 3.1 70B
+category: litellm
+provider: groq
+model: llama-3.1-70b-versatile
+model_settings:
+  temperature: 0.7
+  max_tokens: 1000
+  top_p: 0.95
+prompt: |
+  You are an expert {expertise} assistant. Please help with the following request:
+
+  Task: {task}
+  Context: {context}
+
+  Requirements:
+  - Provide accurate and helpful information
+  - Be concise but comprehensive
+  - Use clear, professional language
+  - Include practical examples when relevant
+
+  Response:
+input_variables:
+  - expertise
+  - task
+  - context
+references:
+  - https://docs.litellm.ai/docs/providers/groq
+tags:
+  - litellm
+  - groq
+  - llama
+  - fast-inference
+  - versatile

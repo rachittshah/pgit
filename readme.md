@@ -198,18 +198,22 @@ The repository includes example prompts for major providers in `prompts/litellm/
 - `ollama-local-code.yml` - Code generation with local Ollama models
 - `huggingface-translator.yml` - Translation with HuggingFace models
 
-### Supported Providers
+### Supported Providers (2024-2025 Latest Models)
 
-| Provider | Environment Variable | Example Model |
+| Provider | Environment Variable | Latest Models |
 |----------|---------------------|---------------|
-| OpenAI | `OPENAI_API_KEY` | `gpt-4`, `gpt-3.5-turbo` |
-| Anthropic | `ANTHROPIC_API_KEY` | `claude-3-sonnet-20240229` |
-| Google | `GOOGLE_API_KEY` | `gemini-pro` |
-| Azure OpenAI | `AZURE_API_KEY` | `azure/gpt-35-turbo` |
-| HuggingFace | `HUGGINGFACE_API_KEY` | `microsoft/DialoGPT-medium` |
-| Cohere | `COHERE_API_KEY` | `command-r-plus` |
-| Replicate | `REPLICATE_API_KEY` | `meta/llama-2-70b-chat` |
-| Ollama | N/A (local) | `llama2`, `codellama` |
+| OpenAI | `OPENAI_API_KEY` | `gpt-4o`, `gpt-4.1`, `o3-mini`, `gpt-image-1` |
+| Anthropic | `ANTHROPIC_API_KEY` | `claude-3-5-sonnet-20241022`, `claude-4-opus` |
+| Google | `GOOGLE_API_KEY` | `gemini-2.5-pro`, `gemini-2.5-flash` |
+| Azure OpenAI | `AZURE_API_KEY` | `azure/gpt-4o`, `azure/computer-use-preview` |
+| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-r1`, `deepseek-v3` |
+| HuggingFace | `HUGGINGFACE_API_KEY` | `together/deepseek-ai/DeepSeek-R1` |
+| Groq | `GROQ_API_KEY` | `llama-3.1-70b-versatile`, `qwen3-32b` |
+| Mistral | `MISTRAL_API_KEY` | `mistral-large-latest`, `magistral-medium` |
+| Cohere | `COHERE_API_KEY` | `command-a-03-2025` |
+| Novita AI | `NOVITA_API_KEY` | `deepseek/deepseek-r1`, `llama-3.3-70b` |
+| Bedrock | `AWS_ACCESS_KEY_ID` | `claude-4-opus`, `us.deepseek.r1-v1:0` |
+| Ollama | N/A (local) | `llama3.1`, `deepseek-r1` (with wildcards) |
 
 ### Testing
 
