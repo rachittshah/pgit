@@ -23,6 +23,146 @@ The feature-rich software includes:
 In the ever-growing world of AI, PGit brings a much-needed order to manage language model prompts efficiently. Its features resonate with the industry's demand for traceability and reusability, making it a quintessential tool for anyone dealing with large language models.
 
 
+## Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        CLI[CLI Tools]
+        API_CLIENT[HTTP Client]
+        CURL[curl/API Calls]
+    end
+    
+    subgraph "pgit Core System"
+        API[FastAPI Server<br/>:8000]
+        VALIDATOR[Prompt Validator]
+        STATS[Statistics Engine]
+        LOADER[Prompt Loader]
+    end
+    
+    subgraph "LiteLLM Integration"
+        LLM_SERVICE[LLM Service Layer]
+        ROUTER[Provider Router]
+        COST_TRACKER[Cost Tracker]
+        STREAM[Streaming Engine]
+    end
+    
+    subgraph "Storage Layer"
+        GIT_REPO[Git Repository]
+        YAML_FILES[YAML Prompt Files]
+        CONFIG[Configuration Files]
+        ENV[Environment Variables]
+    end
+    
+    subgraph "LLM Providers"
+        OPENAI[OpenAI<br/>GPT-4o, GPT-4.1]
+        ANTHROPIC[Anthropic<br/>Claude 3.5 Sonnet]
+        GOOGLE[Google<br/>Gemini 2.5 Pro]
+        AZURE[Azure OpenAI<br/>GPT-4o]
+        DEEPSEEK[DeepSeek<br/>R1, V3]
+        GROQ[Groq<br/>Llama 3.1 70B]
+        MISTRAL[Mistral<br/>Large Latest]
+        OTHERS[100+ Other<br/>Providers]
+    end
+    
+    %% Client to Core connections
+    CLI --> VALIDATOR
+    CLI --> STATS  
+    CLI --> LOADER
+    API_CLIENT --> API
+    CURL --> API
+    
+    %% Core system connections
+    API --> LLM_SERVICE
+    API --> VALIDATOR
+    VALIDATOR --> YAML_FILES
+    STATS --> YAML_FILES
+    LOADER --> GIT_REPO
+    
+    %% LiteLLM connections
+    LLM_SERVICE --> ROUTER
+    LLM_SERVICE --> COST_TRACKER
+    LLM_SERVICE --> STREAM
+    ROUTER --> OPENAI
+    ROUTER --> ANTHROPIC
+    ROUTER --> GOOGLE
+    ROUTER --> AZURE
+    ROUTER --> DEEPSEEK
+    ROUTER --> GROQ
+    ROUTER --> MISTRAL
+    ROUTER --> OTHERS
+    
+    %% Storage connections
+    API --> YAML_FILES
+    LLM_SERVICE --> ENV
+    API --> CONFIG
+    YAML_FILES --> GIT_REPO
+    
+    %% Styling
+    classDef clientClass fill:#e1f5fe
+    classDef coreClass fill:#f3e5f5
+    classDef llmClass fill:#fff3e0
+    classDef storageClass fill:#e8f5e8
+    classDef providerClass fill:#fce4ec
+    
+    class CLI,API_CLIENT,CURL clientClass
+    class API,VALIDATOR,STATS,LOADER coreClass
+    class LLM_SERVICE,ROUTER,COST_TRACKER,STREAM llmClass
+    class GIT_REPO,YAML_FILES,CONFIG,ENV storageClass
+    class OPENAI,ANTHROPIC,GOOGLE,AZURE,DEEPSEEK,GROQ,MISTRAL,OTHERS providerClass
+```
+
+## Workflow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as FastAPI Server
+    participant LLM as LLM Service
+    participant Router as Provider Router
+    participant Provider as LLM Provider
+    participant Git as Git Repository
+    
+    Note over Client,Git: Prompt Execution Workflow
+    
+    Client->>API: POST /repo/inference/name/prompt_name
+    API->>Git: Load prompt YAML file
+    Git-->>API: Return prompt data
+    API->>API: Validate request & merge variables
+    API->>LLM: Execute prompt request
+    LLM->>Router: Route to appropriate provider
+    Router->>Provider: Send formatted request
+    Provider-->>Router: Return response
+    Router-->>LLM: Process & track costs
+    LLM-->>API: Return formatted response
+    API-->>Client: JSON response with metadata
+    
+    Note over Client,Git: Streaming Workflow
+    
+    Client->>API: POST /repo/inference/stream/name/prompt_name
+    API->>Git: Load prompt configuration
+    API->>LLM: Execute streaming request
+    LLM->>Router: Initialize stream connection
+    loop Stream chunks
+        Provider-->>Router: Stream chunk
+        Router-->>LLM: Process chunk
+        LLM-->>API: Format chunk
+        API-->>Client: Server-sent event
+    end
+    
+    Note over Client,Git: Management Operations
+    
+    Client->>API: GET /repo/models
+    API->>Git: Scan prompt files
+    Git-->>API: Available models list
+    API-->>Client: Provider/model summary
+    
+    Client->>API: GET /health
+    API->>LLM: Check provider status
+    LLM-->>API: Provider availability
+    API-->>Client: Health report
+```
+
 ## Technical Overview
 
 **Prompt Validation and Statistics Utility**
