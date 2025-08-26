@@ -1,0 +1,52 @@
+title: Mistral Large Coding Assistant
+uuid: i9j0k1l2-m3n4-5678-ijkl-901234567890
+description: Advanced coding assistance using Mistral Large Latest
+category: litellm
+provider: mistral
+model: mistral-large-latest
+model_settings:
+  temperature: 0.1
+  max_tokens: 2000
+  top_p: 0.9
+prompt: |
+  You are an expert software engineer. Please help with the following coding task:
+
+  Language: {language}
+  Task Description: {task_description}
+  
+  {additional_requirements}
+
+  Please provide:
+  
+  ## Solution
+  ```{language}
+  // Your code here
+  ```
+
+  ## Explanation
+  Brief explanation of the approach and key implementation details
+
+  ## Usage Example
+  ```{language}
+  // Example of how to use the code
+  ```
+
+  ## Notes
+  - Any important considerations
+  - Potential edge cases
+  - Performance or security implications
+
+  Write clean, efficient, and well-documented code.
+input_variables:
+  - language
+  - task_description
+  - additional_requirements
+references:
+  - https://docs.litellm.ai/docs/providers/mistral
+tags:
+  - litellm
+  - mistral
+  - coding
+  - programming
+  - large
+  - software-engineering

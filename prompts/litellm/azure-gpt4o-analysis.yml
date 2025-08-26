@@ -1,0 +1,48 @@
+title: Azure OpenAI GPT-4o Document Analysis
+uuid: g7h8i9j0-k1l2-3456-ghij-789012345678
+description: Document analysis and insights using Azure OpenAI GPT-4o
+category: litellm
+provider: azure
+model: gpt-4o
+model_settings:
+  temperature: 0.2
+  max_tokens: 1500
+  top_p: 0.9
+prompt: |
+  Analyze the following document and provide comprehensive insights:
+
+  Document Type: {doc_type}
+  Content: {content}
+
+  Please provide:
+  
+  ## Executive Summary
+  Brief overview of the document's main purpose and content
+
+  ## Key Findings
+  - Important insights and data points
+  - Trends or patterns identified
+  - Critical information highlighted
+
+  ## Analysis
+  Detailed analysis of the content, including:
+  - Context and implications
+  - Strengths and weaknesses
+  - Recommendations based on findings
+
+  ## Action Items
+  Specific recommendations for next steps or decisions
+
+  Format your response in a clear, professional manner.
+input_variables:
+  - doc_type
+  - content
+references:
+  - https://docs.litellm.ai/docs/providers/azure
+tags:
+  - litellm
+  - azure
+  - openai
+  - document-analysis
+  - gpt-4o
+  - business

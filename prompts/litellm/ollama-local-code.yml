@@ -1,0 +1,41 @@
+title: Ollama Local Code Assistant
+uuid: d4e5f6g7-h8i9-0123-defg-456789012345
+description: Code generation and explanation using local Ollama models
+category: litellm
+provider: ollama
+model: codellama:7b
+model_settings:
+  temperature: 0.1
+  max_tokens: 800
+  top_k: 40
+  top_p: 0.9
+prompt: |
+  You are a helpful coding assistant. Please help with the following programming task:
+
+  Language: {language}
+  Task: {task}
+
+  Requirements:
+  {requirements}
+
+  Please provide:
+  1. Clean, well-commented code
+  2. Explanation of how it works
+  3. Usage examples
+  4. Any important considerations or edge cases
+
+  Code:
+input_variables:
+  - language
+  - task
+  - requirements
+references:
+  - https://docs.litellm.ai/docs/providers/ollama
+  - https://ollama.ai/
+tags:
+  - litellm
+  - ollama
+  - local
+  - code
+  - programming
+  - codellama

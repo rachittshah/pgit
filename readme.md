@@ -18,6 +18,8 @@ The feature-rich software includes:
 
 **7. Prompt Creation:** A command-line utility lets you create a prompt interactively, adhering to the PGit schema. This feature is currently a proof of concept and is under development for further enhancements.
 
+**8. LiteLLM Integration:** ⭐ **NEW** Execute your prompts with real LLMs using LiteLLM's unified interface. Support for 100+ LLM providers including OpenAI, Anthropic, Google, Azure, HuggingFace, and more. Features include streaming responses, cost tracking, and automatic provider routing.
+
 In the ever-growing world of AI, PGit brings a much-needed order to manage language model prompts efficiently. Its features resonate with the industry's demand for traceability and reusability, making it a quintessential tool for anyone dealing with large language models.
 
 
@@ -53,3 +55,205 @@ To retrieve a prompt from a GitHub repository and save it to a local file in JSO
 ```python
 python prompt_loader.py --repo 'rachittshah/pgit' --prompt 'instruct/summarize' --save 'localfile.json' --json
 ```
+
+## LiteLLM Integration
+
+### Overview
+
+PGit now includes powerful LLM inference capabilities through [LiteLLM](https://github.com/berriai/litellm) integration. This allows you to not just manage prompts, but actually execute them with real language models from 100+ providers using a unified API.
+
+### Features
+
+- **🌐 Universal Provider Support**: OpenAI, Anthropic, Google, Azure, HuggingFace, Cohere, Replicate, Together AI, Groq, Mistral, and many more
+- **🔄 Streaming Responses**: Real-time response streaming for better user experience  
+- **💰 Cost Tracking**: Automatic usage and cost monitoring across all providers
+- **⚙️ Dynamic Configuration**: Override model settings per request
+- **🔑 Secure API Key Management**: Environment variable-based configuration
+- **📊 Usage Analytics**: Detailed execution metrics and performance tracking
+
+### Quick Start
+
+#### 1. Installation
+
+Install the required dependencies:
+
+```bash
+cd server/
+pip install -r requirements.txt
+```
+
+#### 2. Configuration
+
+Set up your API keys as environment variables:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env and add your API keys
+export OPENAI_API_KEY="your_openai_key_here"
+export ANTHROPIC_API_KEY="your_anthropic_key_here"
+export GOOGLE_API_KEY="your_google_key_here"
+# ... add other providers as needed
+```
+
+Configure pgit:
+
+```bash
+cp ps.conf.example ps.conf
+# Edit ps.conf to set your repository path
+```
+
+#### 3. Start the Server
+
+```bash
+cd server/
+python -m uvicorn api:app --host 0.0.0.0 --port 8000
+```
+
+#### 4. Execute Prompts
+
+Execute a prompt via the API:
+
+```bash
+curl -X POST "http://localhost:8000/your_repo/inference/name/openai-gpt4-analysis" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input_variables": {
+      "text": "This is a wonderful day! The weather is perfect."
+    },
+    "override_settings": {
+      "temperature": 0.7,
+      "max_tokens": 300
+    }
+  }'
+```
+
+### API Endpoints
+
+#### Health & Configuration
+
+- `GET /health` - Health check with provider status
+- `GET /config` - Configuration summary and API key status
+
+#### Model Discovery  
+
+- `GET /{repo}/models` - List available models from repository prompts
+
+#### Prompt Execution
+
+- `POST /{repo}/inference/name/{prompt_name}` - Execute prompt by name
+- `POST /{repo}/inference/uuid/{prompt_uuid}` - Execute prompt by UUID
+- `POST /{repo}/inference/stream/name/{prompt_name}` - Streaming execution
+
+### Request/Response Format
+
+#### Request Body
+
+```json
+{
+  "input_variables": {
+    "variable1": "value1",
+    "variable2": "value2"
+  },
+  "override_settings": {
+    "temperature": 0.7,
+    "max_tokens": 500,
+    "top_p": 0.9
+  },
+  "stream": false,
+  "include_raw_response": false
+}
+```
+
+#### Response Format
+
+```json
+{
+  "response": "Generated text from the LLM...",
+  "metadata": {
+    "prompt_id": "uuid-here",
+    "prompt_title": "Prompt Title",
+    "model": "openai/gpt-4",
+    "provider": "openai",
+    "usage": {
+      "prompt_tokens": 50,
+      "completion_tokens": 100,
+      "total_tokens": 150,
+      "cost": 0.002
+    },
+    "execution_time": 1.23,
+    "timestamp": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
+### Example Prompts
+
+The repository includes example prompts for major providers in `prompts/litellm/`:
+
+- `openai-gpt4-analysis.yml` - Text analysis with OpenAI GPT-4
+- `anthropic-claude-creative.yml` - Creative writing with Claude
+- `google-gemini-research.yml` - Research assistance with Gemini
+- `ollama-local-code.yml` - Code generation with local Ollama models
+- `huggingface-translator.yml` - Translation with HuggingFace models
+
+### Supported Providers (2024-2025 Latest Models)
+
+| Provider | Environment Variable | Latest Models |
+|----------|---------------------|---------------|
+| OpenAI | `OPENAI_API_KEY` | `gpt-4o`, `gpt-4.1`, `o3-mini`, `gpt-image-1` |
+| Anthropic | `ANTHROPIC_API_KEY` | `claude-3-5-sonnet-20241022`, `claude-4-opus` |
+| Google | `GOOGLE_API_KEY` | `gemini-2.5-pro`, `gemini-2.5-flash` |
+| Azure OpenAI | `AZURE_API_KEY` | `azure/gpt-4o`, `azure/computer-use-preview` |
+| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-r1`, `deepseek-v3` |
+| HuggingFace | `HUGGINGFACE_API_KEY` | `together/deepseek-ai/DeepSeek-R1` |
+| Groq | `GROQ_API_KEY` | `llama-3.1-70b-versatile`, `qwen3-32b` |
+| Mistral | `MISTRAL_API_KEY` | `mistral-large-latest`, `magistral-medium` |
+| Cohere | `COHERE_API_KEY` | `command-a-03-2025` |
+| Novita AI | `NOVITA_API_KEY` | `deepseek/deepseek-r1`, `llama-3.3-70b` |
+| Bedrock | `AWS_ACCESS_KEY_ID` | `claude-4-opus`, `us.deepseek.r1-v1:0` |
+| Ollama | N/A (local) | `llama3.1`, `deepseek-r1` (with wildcards) |
+
+### Testing
+
+Run the integration test suite:
+
+```bash
+python test_litellm_integration.py
+```
+
+This will test all endpoints and provide a comprehensive report of the integration status.
+
+### Error Handling
+
+The API provides detailed error messages for common issues:
+
+- Missing API keys
+- Invalid prompt variables  
+- Model availability issues
+- Rate limiting
+- Network errors
+
+### Cost Management
+
+- Automatic cost calculation for supported providers
+- Usage tracking per prompt execution
+- Token consumption monitoring
+- Cost alerts and budgeting (planned)
+
+### Performance
+
+- Async execution for better throughput
+- Connection pooling for provider APIs
+- Caching for improved response times
+- Automatic retry logic with exponential backoff
+
+### Security
+
+- API keys stored as environment variables only
+- No logging of sensitive information
+- Request validation and sanitization
+- Optional authentication (configurable)
+
+For more details, see the [LiteLLM documentation](https://docs.litellm.ai/).
