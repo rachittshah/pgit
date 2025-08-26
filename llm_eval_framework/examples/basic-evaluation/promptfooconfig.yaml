@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+description: "Basic evaluation example for promptfoo-python"
+
+providers:
+  - openai:gpt-3.5-turbo
+  - openai:gpt-4o-mini
+
+prompts:
+  - "Answer this question concisely: {{question}}"
+
+defaultTest:
+  assert:
+    - type: cost
+      threshold: 0.01
+    - type: latency
+      threshold: 5.0
+
+tests:
+  - vars:
+      question: "What is 2 + 2?"
+    assert:
+      - type: contains
+        value: "4"
+      - type: not-contains
+        value: "I don't know"
+
+  - vars:
+      question: "What is the capital of France?"
+    assert:
+      - type: icontains
+        value: "paris"
+      
+  - vars:
+      question: "Name three programming languages"
+    assert:
+      - type: regex
+        value: "(?i)(python|javascript|java|c\\+\\+|go|rust)"

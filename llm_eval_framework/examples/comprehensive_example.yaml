@@ -1,0 +1,229 @@
+# Comprehensive LLM Evaluation Framework Example Configuration
+# This example demonstrates all available features and capabilities
+
+# Basic configuration
+description: "Comprehensive LLM evaluation with multiple providers and advanced features"
+version: "0.2.0"
+
+# Multiple providers for comparison
+providers:
+  - id: "gpt-4"
+    config:
+      model: "gpt-4"
+      temperature: 0.7
+      max_tokens: 1000
+  
+  - id: "gpt-3.5-turbo"
+    config:
+      model: "gpt-3.5-turbo"
+      temperature: 0.7
+      max_tokens: 1000
+  
+  - id: "claude-3-sonnet"
+    config:
+      model: "claude-3-sonnet-20240229"
+      temperature: 0.7
+      max_tokens: 1000
+  
+  - id: "gemini-pro"
+    config:
+      model: "gemini-pro"
+      temperature: 0.7
+      max_tokens: 1000
+
+# Prompts with variable substitution
+prompts:
+  - "You are a helpful assistant. Answer the following question: {{question}}"
+  - "As an expert in {{domain}}, please explain: {{question}}"
+  - |
+    You are a {{role}} with expertise in {{domain}}.
+    
+    Question: {{question}}
+    Context: {{context}}
+    
+    Please provide a detailed answer that:
+    1. Addresses the question directly
+    2. Uses relevant examples
+    3. Is appropriate for a {{audience}} audience
+
+# Test cases with comprehensive assertions
+tests:
+  # Basic question answering
+  - description: "General knowledge questions"
+    vars:
+      question: "What is the capital of France?"
+      domain: "geography"
+      role: "geography teacher"
+      context: "This is for a middle school geography class"
+      audience: "student"
+    assert:
+      - type: "contains"
+        value: "Paris"
+        description: "Should mention Paris as the capital"
+      - type: "not-contains"
+        value: "London"
+        description: "Should not confuse with London"
+      - type: "cost"
+        threshold: 0.01
+        description: "Cost should be reasonable"
+      - type: "latency" 
+        threshold: 10
+        description: "Should respond within 10 seconds"
+
+  # Technical questions with LLM-as-judge evaluation
+  - description: "Technical explanation quality"
+    vars:
+      question: "How does machine learning work?"
+      domain: "computer science"
+      role: "AI researcher"
+      context: "Explaining to software developers"
+      audience: "professional"
+    assert:
+      - type: "llm-rubric"
+        value:
+          criteria: |
+            Rate the response on the following criteria:
+            - Technical accuracy (1-5)
+            - Clarity of explanation (1-5) 
+            - Use of appropriate examples (1-5)
+            - Appropriate complexity level (1-5)
+        description: "Quality assessment using LLM judge"
+      - type: "contains"
+        value: "algorithm"
+        description: "Should mention algorithms"
+      - type: "icontains"
+        value: "data"
+        description: "Should mention data (case insensitive)"
+
+  # Creative writing with custom Python evaluator
+  - description: "Creative writing evaluation"
+    vars:
+      question: "Write a short story about AI and humans working together"
+      domain: "creative writing"
+      role: "creative writer"
+      context: "Science fiction story for general audience"
+      audience: "general"
+    assert:
+      - type: "python"
+        value: |
+          # Custom Python evaluation
+          import re
+          
+          # Check story elements
+          has_characters = bool(re.search(r'\b(human|person|people|character)\b', output.lower()))
+          has_ai = bool(re.search(r'\b(ai|artificial intelligence|robot|machine)\b', output.lower()))
+          has_collaboration = bool(re.search(r'\b(work|collaborate|together|partnership|team)\b', output.lower()))
+          word_count = len(output.split())
+          
+          # Scoring
+          element_score = (has_characters + has_ai + has_collaboration) / 3
+          length_score = min(word_count / 200, 1.0)  # Target ~200 words
+          
+          result = (element_score + length_score) / 2
+        description: "Custom story evaluation"
+      - type: "regex"
+        value: ".*[.!?]$"
+        description: "Should end with proper punctuation"
+
+# Multi-turn conversation testing
+conversation_tests:
+  - description: "Multi-turn customer support conversation"
+    conversation_id: "support_chat_1"
+    system: "You are a helpful customer support agent for a tech company."
+    turns:
+      - user: "Hi, I'm having trouble with my software installation"
+        assert:
+          - type: "contains"
+            value: "help"
+          - type: "conversation-context"
+            value: ["installation", "software"]
+      
+      - user: "It says 'permission denied' when I try to run the installer"
+        assert:
+          - type: "contains"
+            value: "administrator"
+          - type: "conversation-context"
+            value: ["permission", "installer"]
+      
+      - user: "I tried running as admin but it still doesn't work"
+        assert:
+          - type: "llm-helpfulness"
+            description: "Should provide helpful troubleshooting steps"
+          - type: "conversation-length"
+            value: 6  # 3 user + 3 assistant messages
+
+# Dataset integration
+datasets:
+  - path: "./datasets/qa_dataset.csv"
+    description: "Question-answering dataset"
+  - path: "./datasets/technical_questions.json"
+    description: "Technical questions with expected answers"
+
+# Variable transformations
+transforms:
+  - type: "jinja2"
+    template: "Question: {{question}}\nDomain: {{domain}}"
+    target: "formatted_prompt"
+  
+  - type: "python"
+    code: |
+      # Add metadata
+      import datetime
+      evaluation_timestamp = datetime.datetime.now().isoformat()
+      question_length = len(question.split())
+    
+  - type: "lookup"
+    source: "domain"
+    table:
+      "geography": "🌍 Geography"
+      "computer science": "💻 Computer Science" 
+      "creative writing": "✍️ Creative Writing"
+    target: "domain_emoji"
+
+# Red team configuration for safety testing
+redteam:
+  enabled: true
+  plugins:
+    - "prompt-injection"
+    - "jailbreak"
+    - "harmful-content"
+  strategies:
+    - "iterative"
+    - "multilingual"
+  numTests: 50
+  injectVar: "question"
+
+# Output configuration
+outputPath: "./results/comprehensive_eval_{{timestamp}}.json"
+
+# Web dashboard configuration
+web:
+  enabled: true
+  port: 8080
+  host: "0.0.0.0"
+  sharing:
+    enabled: true
+    ttl: "14d"  # 14 days
+
+# Evaluation settings
+concurrency: 5  # Run 5 tests in parallel
+cache: true
+timeout: 30     # 30 second timeout per test
+retries: 2      # Retry failed tests up to 2 times
+
+# Report generation
+reports:
+  html:
+    enabled: true
+    path: "./reports/comprehensive_report.html"
+    template: "detailed"
+  
+  pdf:
+    enabled: true
+    path: "./reports/comprehensive_report.pdf"
+    format: "executive_summary"
+
+# Environment variables (reference only - actual values should be in .env)
+# OPENAI_API_KEY=your_openai_key
+# ANTHROPIC_API_KEY=your_anthropic_key
+# GOOGLE_API_KEY=your_google_key
