@@ -25,18 +25,22 @@ class PromptLoader:
             print(f'(error) failed to parse repo name - exception: {err}')
             print('name should be in the format of username/repo')
             return prompt_data
-    
+
         url = f'{self.base_url}/{repo_user}/{repo_name}/main/prompts/{full_prompt_name}.yml'
-        full_prompt_name = full_prompt_name + '.yml' if not full_prompt_name.endswith('.yml') else full_prompt_name
+        full_prompt_name = (
+            f'{full_prompt_name}.yml'
+            if not full_prompt_name.endswith('.yml')
+            else full_prompt_name
+        )
 
         print(f'(status) retrieving template: {url}')
-    
+
         try:
             response = requests.get(url)
             if response.status_code != 200:
                 print(f'(error) error retrieving template - non 200 status code: {response.status_code}')
                 return prompt_data
-    
+
             prompt_data = yaml.safe_load(response.text)
 
         except Exception as err:
