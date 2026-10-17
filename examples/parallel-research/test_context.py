@@ -165,6 +165,17 @@ class SearchTests(unittest.IsolatedAsyncioTestCase):
 
 
 class CommandTests(unittest.TestCase):
+    def test_cli_reports_underlying_network_error(self):
+        fixture = SearchTransport(failure="network")
+        output, error = io.StringIO(), io.StringIO()
+        with patch.object(context.httpx, "AsyncClient", fixture.client), \
+                patch.object(sys, "argv", ["context.py", "Question?", "--query", "specific search query",
+                                           "--session-id", "stable-test-session"]), \
+                redirect_stdout(output), redirect_stderr(error):
+            self.assertEqual(context.main(), 1)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("connection unavailable", error.getvalue())
+
     def test_cli_produces_only_request_json(self):
         fixture = SearchTransport()
         output = io.StringIO()

@@ -69,6 +69,13 @@ def nonempty(value):
     return value
 
 
+def error_message(error):
+    # The MCP transport uses task groups; show their underlying network error.
+    if isinstance(error, BaseExceptionGroup):
+        return "; ".join(error_message(child) for child in error.exceptions)
+    return str(error) or type(error).__name__
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("question", type=nonempty)
@@ -82,7 +89,7 @@ def main():
     try:
         request = asyncio.run(build_request(args.question, args.query, args.session_id))
     except Exception as error:
-        print(f"Search failed: {error}", file=sys.stderr)
+        print(f"Search failed: {error_message(error)}", file=sys.stderr)
         return 1
     print(json.dumps(request, ensure_ascii=False, indent=2))
     return 0
