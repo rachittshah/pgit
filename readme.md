@@ -338,6 +338,9 @@ The repository includes example prompts for major providers in `prompts/litellm/
 - `ollama-local-code.yml` - Code generation with local Ollama models
 - `huggingface-translator.yml` - Translation with HuggingFace models
 
+For current web sources, try the optional [Parallel research example](examples/parallel-research/).
+It prepares source excerpts and URLs as inputs for the existing context QA prompts.
+
 ### Supported Providers (2024-2025 Latest Models)
 
 | Provider | Environment Variable | Latest Models |
